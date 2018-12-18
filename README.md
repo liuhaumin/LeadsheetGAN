@@ -1,63 +1,69 @@
-MuseGAN
-=======
+# LeadsheetGAN 自動簡譜生成 :musical_note:
+[Lead Sheet GAN](https://liuhaumin.github.io/LeadsheetArrangement/) is a task to automatically generate lead sheets. There are several types we use in generation.
+- Unconditional generation: generate melody and chords from nothing
+- Conditional generation: generate melody-conditioned chord or chord-conditioned melody
 
-[MuseGAN](https://salu133445.github.io/musegan/) is a project on music generation.
-In essence, we aim to generate polyphonic music of multiple tracks (instruments) with harmonic and rhythmic structure, multi-track interdependency and temporal structure.
-To our knowledge, our work represents the first approach that deal with these issues altogether.
+We train the model with TheoryTab (TT) dataset to generate pop song style leadsheets.
 
-The models are trained with [Lakh Pianoroll Dataset](https://salu133445.github.io/musegan/dataset) (LPD), a new multi-track piano-roll dataset, in an unsupervised approach.
-The proposed models are able to generate music either from scratch, or by accompanying a track given by user.
-Specifically, we use the model to generate pop song phrases consisting of bass, drums, guitar, piano and strings tracks.
-Sample results are available [here](https://salu133445.github.io/musegan/results).
+Sample results are available
+[here](https://liuhaumin.github.io/LeadsheetArrangement/results).
 
-Paper
------
+## Papers
 
-Hao-Wen Dong\*, Wen-Yi Hsiao\*, Li-Chia Yang and Yi-Hsuan Yang, "**MuseGAN: Multi-track Sequential Generative Adversarial Networks for Symbolic Music Generation and Accompaniment**," in *AAAI Conference on Artificial Intelligence (AAAI)*, 2018.
-[[arxiv](http://arxiv.org/abs/1709.06298)]
-[[slides](https://github.com/salu133445/musegan/blob/master/docs/pdf/musegan-aaai2018-slides.pdf)]
+__Lead sheet generation and arrangement by conditional generative adversarial network__<br>
+Hao-Min Liu and Yi-Hsuan Yang,
+to appear in *International Conference on Machine Learning and Applications* (ICMLA), 2018.
+[[arxiv](https://arxiv.org/abs/1807.11161)]
 
-\**These authors contributed equally to this work.*
+__Lead sheet and Multi-track Piano-roll generation using MuseGAN__<br>
+Hao-Min Liu, Hao-Wen Dong, Wen-Yi Hsiao and Yi-Hsuan Yang,
+in *GPU Technology Conference* (GTC), 2018.
+[[poster](https://liuhaumin.github.io/LeadsheetArrangement/pdf/GTC_poster_HaoMin.pdf)]
 
-Usage
------
-
+## Usage
+### Step 1: adjust training or testing modes in main.py
 ```python
 import tensorflow as tf
 from musegan.core import MuseGAN
 from musegan.components import NowbarHybrid
 from config import *
 
-# initialize a tensorflow session
-with tf.Session(config=config) as sess:
+# Initialize a tensorflow session
 
-    ###  prerequisites ###
-    # step 1. initialize the training configuration
+""" Create TensorFlow Session """
+with tf.Session() as sess:
+    
+    # === Prerequisites ===
+    # Step 1 - Initialize the training configuration        
     t_config = TrainingConfig
-    # step 2. select the desired model
-    model = NowbarHybrid(NowBarHybridConfig)
-    # step 3. initialize the input data object
-    input_data = InputDataNowBarHybrid(model)
-    # step 4. load training data
-    path_train = 'train.npy'
-    input_data.add_data(path_train, key='train')
-    # step 5. initialize the museGAN object
-    musegan = MuseGAN(sess, t_config, model)
+    t_config.exp_name = 'exps/nowbar_hybrid'        
 
-    ###  training ###
+    # Step 2 - Select the desired model
+    model = NowbarHybrid(NowBarHybridConfig)
+    
+    # Step 3 - Initialize the input data object
+    input_data = InputDataNowBarHybrid(model)
+    
+    # Step 4 - Load training data
+    path_x_train_bar = 'tra_X_bars'
+    path_y_train_bar = 'tra_y_bars'
+    input_data.add_data_sa(path_x_train_bar, path_y_train_bar, 'train') # x: input, y: conditional feature
+    
+    # Step 5 - Initialize a museGAN object
+    musegan = MuseGAN(sess, t_config, model)
+    
+    # === Training ===
     musegan.train(input_data)
 
-    ### load and generate samples ###
-    # load pretrained model
+    # === Load a Pretrained Model ===
     musegan.load(musegan.dir_ckpt)
-    # add testing data
-    path_test = 'train.npy'
-    input_data.add_data(path_test, key='test')
-    # generate samples
+
+    # === Generate Samples ===
+    path_x_test_bar = 'val_X_bars'
+    path_y_test_bar = 'val_y_bars'
+    input_data.add_data_sa(path_x_test_bar, path_y_test_bar, key='test')
     musegan.gen_test(input_data, is_eval=True)
+
 ```
-
-Latent Space Interpolation
---------------------------
-
-![image](https://github.com/salu133445/musegan/blob/master/docs/figs/train.gif)
+### Step 2: run store_sa.py
+### Step 3: run main.py
