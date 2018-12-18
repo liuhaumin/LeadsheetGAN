@@ -1,7 +1,7 @@
 # LeadsheetGAN 自動簡譜生成 :musical_note:
 [Lead Sheet GAN](https://liuhaumin.github.io/LeadsheetArrangement/) is a task to automatically generate lead sheets. There are several types we use in generation.
-- Unconditional generation: generate melody and chords from nothing
-- Conditional generation: generate melody-conditioned chord or chord-conditioned melody
+- **Unconditional generation:** generate melody and chords from nothing
+- **Conditional generation:** generate melody-conditioned chord or chord-conditioned melody
 
 We train the model with TheoryTab (TT) dataset to generate pop song style leadsheets.
 
